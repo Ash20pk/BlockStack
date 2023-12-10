@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-
 import FeatureCard from "../components/FeatureCard";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -7,32 +6,35 @@ import Login from "../components/Login";
 import Logo from "../components/Logo";
 import { Web3Context } from "../context/Web3Context";
 
+
 const features = [
   {
-    title: "Decentralized",
+    title: "Blockchain-based",
     description:
-      "The platform is completely decentralized, without any centralized control or ownership",
+      "Built on a decentralized blockchain network, ensuring transparency and security",
   },
   {
-    title: "Incentives",
+    title: "Crypto Rewards",
     description:
-      "Users receive CELO token rewards for providing reliable answers, moreover they earn points and can receive discounts in our NFT Marketplace",
+      "Users earn unique NFT badges as rewards for active participation and contributions",
   },
   {
-    title: "Reliable",
+    title: "Data Ownership",
     description:
-      "Content ownership completely resides with the user and incentives enable the generation of more reliable content",
+      "Complete ownership of user-generated content, empowering users and ensuring trust",
   },
   {
-    title: "Privacy-preserving",
+    title: "Privacy-focused",
     description:
-      "We do not collect any kind of user data, complete anonymity of users is guaranteed",
+      "Strict privacy measures in place, no collection of personal data, ensuring user anonymity",
   },
 ];
 
 const Home = () => {
+
+
   const [loginPopupVisible, setLoginPopupVisible] = useState(false);
-  const { address, tryConnectWallet, getUserInfo, CryptoStack } =
+  const { address, tryConnectWallet, getUserInfo, CryptoStack, logout } =
     useContext(Web3Context);
 
   useEffect(() => {
@@ -46,6 +48,16 @@ const Home = () => {
     }
   };
 
+  const handleWalletButtonClick = () => {
+    if (address) {
+      // If address exists, it means the user is logged in, so logout
+      logout();
+    } else {
+      // If address doesn't exist, it means the user is not logged in, so connect wallet
+      tryConnectWallet();
+    }
+  };
+
   return (
     <>
       <Header />
@@ -55,12 +67,12 @@ const Home = () => {
           className="flex flex-col items-center justify-center min-h-[70vh]"
         >
           <Logo scale={4} />
-          <h1 className="text-[64px] font-bold mt-[20px]">CryptoStack</h1>
+          <h1 className="text-[64px] font-bold mt-[20px]">BlockStack</h1>
           <p className="text-center text-gray-600 max-w-[600px] mx-auto">
-            Decentralized Q&A Platform and NFT Marketplace
+            Decentralized Q&A Platform
           </p>
           <button
-            onClick={tryConnectWallet}
+            onClick={handleWalletButtonClick}
             className="mt-[20px] py-[10px] px-[20px] bg-blue-500 text-white font-bold rounded hover:bg-blue-400 transition-all duration-300 ease-in-out"
           >
             {address ? "Logout" : "Connect your wallet now"}

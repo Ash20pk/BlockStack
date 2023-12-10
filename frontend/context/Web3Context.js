@@ -14,11 +14,16 @@ export const Web3Context = createContext({
   getAllQuestions: async () => {},
   getAnswersForQuestion: async (questionId) => {},
   getMyNFTS: async (account) => {},
+  mintMyNFTS: async (account) => {},
   getTokenURI: async (tokenId) => {},
   registerNewUser: async (username, account) => {},
   createNewQuestion: async (question, account) => {},
   answerQuestion: async (questionId, answer, account) => {},
   acceptAnswer: async (answerId, account) => {},
+  upvoteQuestion: async (questionId) => {},
+  downvoteQuestion: async (questionId) => {},
+  upvoteAnswer: async (answerId) => {},
+  downvoteAnswer: async (answerId) => {},
   purchaseNFT: async (tokenURI, account) => {},
   getUserInfo: async () => {},
   getUsername: async (account) => {},
@@ -30,6 +35,7 @@ export const Web3Context = createContext({
   setQuestions: () => {},
   userData: null,
   setUserData: () => {},
+  disconnectWallet: () => {},
 });
 
 const Web3Provider = ({ children }) => {
@@ -55,15 +61,16 @@ const Web3Provider = ({ children }) => {
 
   const loadBlockchainData = async (web3) => {
     const networkId = await web3.eth.net.getId();
-    const csMainData = CryptoStackMain.networks[networkId];
-    const csNFTData = CryptoStackRewardNFT.networks[networkId];
+    const csMainAddress = process.env.NEXT_PUBLIC_MAIN_ADDRESS; // Add this line
+    const csNFTAddress = process.env.NEXT_PUBLIC_NFT_ADDRESS; // Add this line
 
-    if (csMainData && csNFTData) {
+    console.log(csMainAddress, csNFTAddress);
+    if (csMainAddress && csNFTAddress) { // Modify this line
       setCryptoStack(
-        new web3.eth.Contract(CryptoStackMain.abi, csMainData.address)
+        new web3.eth.Contract(CryptoStackMain.abi, csMainAddress)
       );
       setCryptoStackNFT(
-        new web3.eth.Contract(CryptoStackRewardNFT.abi, csNFTData.address)
+        new web3.eth.Contract(CryptoStackRewardNFT.abi, csNFTAddress)
       );
       return true;
     } else {
@@ -72,7 +79,7 @@ const Web3Provider = ({ children }) => {
       );
       return false;
     }
-  };
+};
 
   const getUserInfo = async () => {
     const isRegistered = await CryptoStack.methods
@@ -213,28 +220,74 @@ const Web3Provider = ({ children }) => {
       });
   };
 
-  const purchaseNFT = async (tokenURI) => {
+  const upvoteQuestion = async (questionId) => {
     setLoading(true);
-    const isContributor = await isFrequentContributor(address);
-    let price;
-    if (isContributor) {
-      price = web3.utils.toWei("0.05");
-    } else {
-      price = web3.utils.toWei("0.1");
-    }
     await CryptoStack.methods
-      .payToMint(tokenURI)
-      .send({ from: address, value: price })
+      .upvoteQuestion(questionId)
+      .send({ from: address })
       .on("transactionHash", function (hash) {})
       .on("receipt", function (receipt) {})
       .on("confirmation", (confirmationNumber, receipt) => {
         setLoading(false);
+        // confirmation
       })
       .on("error", (error, receipt) => {
         window.alert("Error occured:", error);
         setLoading(false);
       });
   };
+
+  const downvoteQuestion = async (questionId) => {
+    setLoading(true);
+    await CryptoStack.methods
+      .downvoteQuestion(questionId)
+      .send({ from: address })
+      .on("transactionHash", function (hash) {})
+      .on("receipt", function (receipt) {})
+      .on("confirmation", (confirmationNumber, receipt) => {
+        setLoading(false);
+        // confirmation
+      })
+      .on("error", (error, receipt) => {
+        window.alert("Error occured:", error);
+        setLoading(false);
+      });
+  };
+
+  const upvoteAnswer = async (answerId) => {
+    setLoading(true);
+    await CryptoStack.methods
+      .upvoteAnswer(answerId)
+      .send({ from: address })
+      .on("transactionHash", function (hash) {})
+      .on("receipt", function (receipt) {})
+      .on("confirmation", (confirmationNumber, receipt) => {
+        setLoading(false);
+        // confirmation
+      })
+      .on("error", (error, receipt) => {
+        window.alert("Error occured:", error);
+        setLoading(false);
+      });
+  };
+
+  const downvoteAnswer = async (answerId) => {
+    setLoading(true);
+    await CryptoStack.methods
+      .downvoteAnswer(answerId)
+      .send({ from: address })
+      .on("transactionHash", function (hash) {})
+      .on("receipt", function (receipt) {})
+      .on("confirmation", (confirmationNumber, receipt) => {
+        setLoading(false);
+        // confirmation
+      })
+      .on("error", (error, receipt) => {
+        window.alert("Error occured:", error);
+        setLoading(false);
+      });
+  };
+  
 
   const getMyNFTS = async () => {
     let nfts = [];
@@ -250,6 +303,14 @@ const Web3Provider = ({ children }) => {
       }
     }
     return nfts;
+  };
+
+  const mintMyNFTS = async () => {
+   try{
+    await CryptoStackMain.methods.mintNFT.call();
+   } catch(error) {
+    alert("Failed Mint")
+  };
   };
 
   const tryConnectWallet = async () => {
@@ -275,6 +336,11 @@ const Web3Provider = ({ children }) => {
     }
   };
 
+  const disconnectWallet = () => {
+    setAddress(null);
+    setWeb3(null);
+  };
+
   return (
     <Web3Context.Provider
       value={{
@@ -289,9 +355,9 @@ const Web3Provider = ({ children }) => {
         getAllQuestions,
         getAnswersForQuestion,
         getMyNFTS,
+        mintMyNFTS,
         getTokenURI,
         isFrequentContributor,
-        purchaseNFT,
         registerNewUser,
         CryptoStack,
         CryptoStackNFT,
@@ -303,6 +369,11 @@ const Web3Provider = ({ children }) => {
         setQuestions,
         userData,
         setUserData,
+        disconnectWallet,
+        upvoteQuestion,
+        downvoteQuestion,
+        upvoteAnswer,
+        downvoteAnswer,
       }}
     >
       {children}

@@ -13,7 +13,8 @@ const Question = () => {
     getAnswersForQuestion,
     loading,
     answerQuestion,
-    acceptAnswer,
+    upvoteAnswer,
+    downvoteAnswer,
   } = useContext(Web3Context);
   const [answer, setAnswer] = useState();
   const [answers, setAnswers] = useState([]);
@@ -22,7 +23,7 @@ const Question = () => {
 
   useEffect(() => {
     if (CryptoStack) getQuestionDetails(router.query?.questionId);
-  }, [CryptoStack, router.query?.questionId]);
+  }, [CryptoStack, router.query?.questionId, answers, upvoteAnswer, downvoteAnswer]);
 
   const getQuestionDetails = async (questionId) => {
     const questionDetails = questions.find((data) => {
@@ -40,6 +41,14 @@ const Question = () => {
     answerQuestion(router.query.questionId, answer);
   };
 
+  const handleUpvoteAnswer = (answerId) => {
+    upvoteAnswer(answerId);
+  };
+
+  const handleDownvoteAnswer = (answerId) => {
+    downvoteAnswer(answerId);
+  };
+
   return (
     <>
       <Header />
@@ -51,44 +60,31 @@ const Question = () => {
             </h1>
             {answers ? (
               <div className="flex flex-col">
-                {answers?.map(
-                  ({ isAccepted, answerString, replierUsername, id }, i) => (
-                    <div
-                      className="shadow p-[30px] text-base text-gray-600 mt-[20px] flex flex-col items-start"
-                      key={`answer-${i}`}
-                    >
-                      {isAccepted && (
-                        <div className="text-sm mb-[20px] mr-[20px] flex items-center text-white font-bold bg-green-600 rounded-full px-[20px] py-[10px]">
-                          <span className="text-[28px] font-medium mr-[10px]">
-                            &#10003;
-                          </span>{" "}
-                          Accepted Answer by the questionnaire
-                        </div>
-                      )}
-                      <h4 className="text-sm mb-[10px] border-b-[1px] pb-[10px] flex items-center">
-                        <span>Answered by:</span>
-                        <span className="font-bold">{replierUsername}</span>
-                      </h4>
-                      <p className="">{answerString}</p>
-                      {questionData.questionaireAddress === address && (
-                        <button
-                          className="bg-blue-500 text-white font-semibold px-[20px] py-[10px] mt-[20px] rounded disabled:opacity-50"
-                          onClick={() => acceptAnswer(id)}
-                          disabled={loading}
-                        >
-                          Accept Answer
+                {answers?.map(({ answerString, replierUsername, id, upvotes, downvotes }, i) => (
+                  <div
+                    className="shadow p-[30px] text-base text-gray-600 mt-[20px] flex flex-col items-start"
+                    key={`answer-${i}`}
+                  >
+                    <h4 className="text-sm mb-[10px] border-b-[1px] pb-[10px] flex items-center">
+                      <span>Answered by:</span>
+                      <span className="font-bold">{replierUsername}</span>
+                    </h4>
+                    <p className="">{answerString}</p>
+                    <div className="flex mt-[20px]">
+                      <button onClick={() => handleUpvoteAnswer(id)} className="mr-[10px]">
+                      <span>⬆️</span> Upvote ({upvotes})
+                      </button>
+                      {upvotes > 0 && (
+                        <button onClick={() => handleDownvoteAnswer(id)}>
+                         <span>⬇️ </span> Downvote ({downvotes})
                         </button>
                       )}
                     </div>
-                  )
-                )}
+                  </div>
+                ))}
                 <div className="flex flex-col items-start mt-[20px]">
                   <p>
-                    Not satisfied with the given answer? Write an answer and get
-                    a chance to win CELO tokens!{" "}
-                    <Link href="/nft">
-                      <a className="text-blue-500 font-semibold">Learn more</a>
-                    </Link>
+                    Not satisfied with the given answer? Write your answer{" "}
                   </p>
                   <a
                     href="#answer"
@@ -119,10 +115,7 @@ const Question = () => {
         ) : (
           <Loading />
         )}
-        <section
-          id="answersection"
-          className="flex items-center justify-center"
-        >
+        <section id="answersection" className="flex items-center justify-center">
           <form
             onSubmit={handleAddAnswer}
             className="flex flex-col items-start mt-[30px] w-full border-t-[1px] pt-[20px]"

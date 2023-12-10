@@ -21,14 +21,19 @@ contract CryptoStackMain {
     address questionaireAddress;
     bool isAnswered;
     string questionString;
+    uint256 upvotes;
+    uint256 downvotes;
+    uint256 timestamp;
   }
 
   struct Answer {
     uint id;
     uint questionId;
-    bool isAccepted;
-    address payable replierAddress;
+    address replierAddress;
     string answerString;
+    uint256 upvotes;
+    uint256 downvotes;
+    uint256 timestamp;
   }
   
   User[] public users;
@@ -38,7 +43,10 @@ contract CryptoStackMain {
   event registeredNewUser(address);
   event createdNewQuestion(uint, address);
   event answeredQuestion(uint, uint, address);
-  event acceptedAnswer(uint, uint);
+  event upvotedQuestion(uint, address);
+  event downvotedQuestion(uint, address);
+  event upvotedAnswer(uint, address);
+  event downvotedAnswer(uint, address);
   event NFTMinted(address indexed owner); // Event for NFT minting
 
   // NFT tiers based on user points
@@ -103,21 +111,67 @@ contract CryptoStackMain {
 
   function createNewQuestion(string memory _questionString) external {
     require(isRegisteredUser(msg.sender), "Not registered user");
-    questions.push(Question(questionCount, msg.sender, false , _questionString));
+    questions.push(Question(questionCount, msg.sender, false , _questionString, 0, 0, block.timestamp));
     emit createdNewQuestion(questionCount, msg.sender);
     questionCount++;
   }
 
   function answerQuestion(uint _questionId, string memory _answerString) external {
     require(isRegisteredUser(msg.sender), "Not registered user");
-    answers.push(Answer(answerCount, _questionId, false, payable(msg.sender), _answerString));
+    answers.push(Answer(answerCount, _questionId, msg.sender, _answerString, 0, 0, block.timestamp));
     for (uint i = 0; i < userCount; ++i) {
       if (users[i].userAddress == msg.sender) {
         users[i].userPoints += 10;
       }
+    questions[_questionId].isAnswered = true;
+
     }
     emit answeredQuestion(_questionId, answerCount, msg.sender);
     answerCount++;
+  }
+
+  function upvoteQuestion(uint _questionId) external {
+    require(_questionId < questionCount, "Invalid question ID");
+    questions[_questionId].upvotes++;
+    for (uint i = 0; i < userCount; ++i) {
+      if (users[i].userAddress == msg.sender) {
+        users[i].userPoints += 5;
+      }
+    }
+    emit upvotedQuestion(_questionId, msg.sender);
+  }
+
+  function downvoteQuestion(uint _questionId) external {
+    require(_questionId < questionCount, "Invalid question ID");
+    questions[_questionId].downvotes++;
+    for (uint i = 0; i < userCount; ++i) {
+      if (users[i].userAddress == msg.sender) {
+        users[i].userPoints -= 2;
+      }
+    }
+    emit downvotedQuestion(_questionId, msg.sender);
+  }
+
+  function upvoteAnswer(uint _answerId) external {
+    require(_answerId < answerCount, "Invalid answer ID");
+    answers[_answerId].upvotes++;
+    for (uint i = 0; i < userCount; ++i) {
+      if (users[i].userAddress == msg.sender) {
+        users[i].userPoints += 5;
+      }
+    }
+    emit upvotedAnswer(_answerId, msg.sender);
+  }
+
+  function downvoteAnswer(uint _answerId) external {
+    require(_answerId < answerCount, "Invalid answer ID");
+    answers[_answerId].downvotes++;
+    for (uint i = 0; i < userCount; ++i) {
+      if (users[i].userAddress == msg.sender) {
+        users[i].userPoints -= 2;
+      }
+    }
+    emit downvotedAnswer(_answerId, msg.sender);
   }
 
   function getUserPoints(address _user) public view returns (uint) {
@@ -129,13 +183,4 @@ contract CryptoStackMain {
     return 0;
   }
   
-  function acceptAnswer(uint _answerId) external {
-    Answer memory answer = answers[_answerId];
-    require(questions[answer.questionId].questionaireAddress == msg.sender, "Not original user");
-    questions[answer.questionId].isAnswered = true;
-    answers[_answerId].isAccepted = true;
-    payable(answers[_answerId].replierAddress).transfer(0.01 ether);
-    emit acceptedAnswer(_answerId, answer.questionId);
-  }
-
 }

@@ -27,12 +27,14 @@ export default function Home() {
         <h2 className="font-bold text-[32px]">Recently asked questions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px] mt-[30px]">
           {questions?.length !== 0 ? (
-            questions?.map(({ answers, isAnswered, questionString, id }) => (
+            questions?.map(({ answers, isAnswered, questionString, id, upvotes, downvotes }) => (
               <QuestionCard
                 question={questionString}
                 answers={answers}
                 isAnswered={isAnswered}
                 questionId={id}
+                upvotes={upvotes}
+                downvotes={downvotes}
                 key={id}
               />
             ))

@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Logo from "../Logo";
+
 
 const Footer = () => {
   return (
@@ -6,7 +8,7 @@ const Footer = () => {
       <div className="flex items-center justify-center">
         Powered by{" "}
         <span className="ml-[20px]">
-          <Image src="/logo.svg" alt="CryptoStack" width={51} height={59} />
+        <Logo scale={1} />
         </span>
       </div>
     </footer>

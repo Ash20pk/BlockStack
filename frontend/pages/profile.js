@@ -1,9 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { Web3Context } from "../context/Web3Context";
+import { LogInWithAnonAadhaar, useAnonAadhaar } from "anon-aadhaar-react";
 import Header from "../components/Header";
 import NFTCard from "../components/NFTCard";
 
 const Profile = () => {
+  const [anonAadhaar] = useAnonAadhaar();
   const { userData, setUserData, getUserInfo, getMyNFTS } =
     useContext(Web3Context);
   const [NFTS, setNFTS] = useState([]);
@@ -27,7 +29,9 @@ const Profile = () => {
         <div className="flex flex-col items-start mt-[20px]">
           <div className="grid grid-cols-2 max-w-[600px] items-center">
             <p className="font-bold text-lg">Username:</p>
-            <span>{userData?.userName}</span>
+            <span>
+              {userData?.userName} {anonAadhaar?.status=="logged-in" && "✅"}
+            </span>
             <p className="font-bold text-lg">Wallet Address: </p>
             <span className="font-normal mt-[15px]">
               {userData?.userAddress}
@@ -36,9 +40,15 @@ const Profile = () => {
             <span className="font-normal mt-[15px]">
               {userData?.userPoints}
             </span>
+            <p className="font-bold text-lg"> Get Verified: </p>
+            <span className="mt-4">
+            <div>
+            <LogInWithAnonAadhaar />
+          </div>
+          </span>
           </div>
         </div>
-        <h2 className="my-[30px] font-bold text-[24px]">Owned NFTS</h2>
+        <h2 className="my-[30px] font-bold text-[24px]">Badges Earned</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {NFTS?.map(({ image, description, name, tokenID }) => (
             <NFTCard
