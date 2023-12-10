@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
-import "./CryptoStackRewardNFT.sol"; // Import the NFT contract
+import "./BlockStackRewardNFT.sol"; // Import the NFT contract
 
-contract CryptoStackMain {
+contract BlockStackMain {
 
-  CryptoStackRewardNFT public nftContract; // Instance of the NFT contract
+  BlockStackRewardNFT public nftContract; // Instance of the NFT contract
 
   uint public userCount;
   uint public questionCount;
@@ -55,7 +55,7 @@ contract CryptoStackMain {
   uint constant TIER_3_THRESHOLD = 300;
 
   constructor(address _nftContractAddress) {
-    nftContract = CryptoStackRewardNFT(_nftContractAddress);
+    nftContract = BlockStackRewardNFT(_nftContractAddress);
   }
 
   function isRegisteredUser(address _user) public view returns(bool) {

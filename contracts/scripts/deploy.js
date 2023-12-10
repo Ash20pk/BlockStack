@@ -4,15 +4,15 @@ async function main() {
   const [deployer] = await ethers.getSigners();
 
   // Deploy NFT contract
-  const CryptoStackRewardNFT = await ethers.getContractFactory("CryptoStackRewardNFT");
-  const nftContract = await CryptoStackRewardNFT.deploy(deployer.address);
+  const BlockStackRewardNFT = await ethers.getContractFactory("BlockStackRewardNFT");
+  const nftContract = await BlockStackRewardNFT.deploy(deployer.address);
   await nftContract.waitForDeployment();
 
   console.log("NFT Contract deployed to:", await nftContract.getAddress());
 
   // Deploy Main contract with NFT contract address as an argument
-  const CryptoStackMain = await ethers.getContractFactory("CryptoStackMain");
-  const mainContract = await CryptoStackMain.deploy(nftContract.getAddress());
+  const BlockStackMain = await ethers.getContractFactory("BlockStackMain");
+  const mainContract = await BlockStackMain.deploy(nftContract.getAddress());
   await mainContract.waitForDeployment();
 
   console.log("Main Contract deployed to:", await mainContract.getAddress());
